@@ -10,7 +10,7 @@
  #endif
  
 --- ktsocket.cc.orig	2014-08-19 01:53:42.113180621 +0900
-+++ ktsocket.cc	2014-08-24 22:30:04.979394178 +0900
++++ ktsocket.cc	2014-08-25 00:11:45.926528013 +0900
 @@ -22,6 +22,8 @@
  }
  #elif defined(_KT_EVENT_KQUEUE)
@@ -218,7 +218,7 @@
  #else
    _assert_(event);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1448,6 +1578,71 @@
+@@ -1448,6 +1578,63 @@
      }
    }
    return false;
@@ -241,18 +241,10 @@
 +    int32_t maxevents = 256;
 +    port_event_t events[maxevents];
 +    int32_t rv = 1;
-+    if (::port_getn(core->fd, events, (uint32_t)maxevents, (uint32_t*)&rv, &ts) == -1){
-+      if (errno == EINTR || errno == EAGAIN ) {
-+        continue;
-+      } else if (errno == ETIME && rv == 0) {
-+        continue;
-+      } else  {
-+        pollseterrmsg(core, "port_getn failed b");
-+        break;
-+      }
-+    }
++    ::port_getn(core->fd, events, (uint32_t)maxevents, (uint32_t*)&rv, &ts);
 +    if (rv > 0) {
 +      for (int32_t i = 0; i < rv; i++) {
++        if (events[i].portev_source != PORT_SOURCE_FD ) continue;
 +        Pollable* item = (Pollable*)events[i].portev_user;
 +        uint32_t filter = events[i].portev_events;
 +        uint32_t flags = 0;
@@ -290,7 +282,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1628,6 +1823,25 @@
+@@ -1628,6 +1815,25 @@
    }
    core->elock.unlock();
    return true;
@@ -316,7 +308,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1677,6 +1891,17 @@
+@@ -1677,6 +1883,17 @@
    int64_t count = core->events.size();
    core->elock.unlock();
    return count;
@@ -334,7 +326,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1714,6 +1939,15 @@
+@@ -1714,6 +1931,15 @@
    }
    core->aborted = true;
    return true;
@@ -350,7 +342,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1816,7 +2050,7 @@
+@@ -1816,7 +2042,7 @@
   * Wait an I/O event of a socket.
   */
  static bool waitsocket(int32_t fd, uint32_t mode, double timeout) {
