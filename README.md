@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 kibana_googlemaps
 =================
 
@@ -42,3 +43,7 @@ make install
 # Author
 K.Cima k-cima[at]kendama.asia
 
+=======
+kyototycoon_patch
+=================
+>>>>>>> 34325971d72d2a062d8e9dba74fc907465f1492a
