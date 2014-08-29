@@ -10,7 +10,7 @@
  #endif
  
 --- ktsocket.cc.orig	2014-08-19 01:53:42.113180621 +0900
-+++ ktsocket.cc	2014-08-25 00:11:45.926528013 +0900
++++ ktsocket.cc	2014-08-29 23:53:41.914432091 +0900
 @@ -22,6 +22,8 @@
  }
  #elif defined(_KT_EVENT_KQUEUE)
@@ -218,7 +218,7 @@
  #else
    _assert_(event);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1448,6 +1578,63 @@
+@@ -1448,6 +1578,70 @@
      }
    }
    return false;
@@ -241,7 +241,14 @@
 +    int32_t maxevents = 256;
 +    port_event_t events[maxevents];
 +    int32_t rv = 1;
-+    ::port_getn(core->fd, events, (uint32_t)maxevents, (uint32_t*)&rv, &ts);
++    int32_t res = ::port_getn(core->fd, events, (uint32_t)maxevents, (uint32_t*)&rv, &ts);
++    if (res == -1) {
++        if (errno == EINTR || errno == EAGAIN) {
++            return true;
++        } else if (errno == ETIME) {
++            if (rv == 0) return true;
++        } 
++    } 
 +    if (rv > 0) {
 +      for (int32_t i = 0; i < rv; i++) {
 +        if (events[i].portev_source != PORT_SOURCE_FD ) continue;
@@ -282,7 +289,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1628,6 +1815,25 @@
+@@ -1628,6 +1822,25 @@
    }
    core->elock.unlock();
    return true;
@@ -308,7 +315,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1677,6 +1883,17 @@
+@@ -1677,6 +1890,17 @@
    int64_t count = core->events.size();
    core->elock.unlock();
    return count;
@@ -326,7 +333,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1714,6 +1931,15 @@
+@@ -1714,6 +1938,15 @@
    }
    core->aborted = true;
    return true;
@@ -342,7 +349,7 @@
  #else
    _assert_(true);
    PollerCore* core = (PollerCore*)opq_;
-@@ -1816,7 +2042,7 @@
+@@ -1816,7 +2049,7 @@
   * Wait an I/O event of a socket.
   */
  static bool waitsocket(int32_t fd, uint32_t mode, double timeout) {
