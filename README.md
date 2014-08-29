@@ -1,8 +1,7 @@
-<<<<<<< HEAD
-kibana_googlemaps
+Kyoto Tycoon Solaris event ports patch
 =================
 
-Kyoto Tycoon Solaris event ports patch
+Patch for Kyoto Tycoon to be able to use Solaris event ports
 
 # Install
 Install process for Solaris 11 is following. It can be installed to Solaris 10 with gcc4.
@@ -43,7 +42,3 @@ make install
 # Author
 K.Cima k-cima[at]kendama.asia
 
-=======
-kyototycoon_patch
-=================
->>>>>>> 34325971d72d2a062d8e9dba74fc907465f1492a
